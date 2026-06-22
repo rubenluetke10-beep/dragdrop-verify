@@ -74,6 +74,24 @@ def main() -> int:
     registered = target.register(canvas, db.dispatch_drop)
     print(f"register -> {registered}")
     if not registered:
+        # Surface the swallowed tkdnd error so a CI failure is diagnosable
+        # (register() must never raise in production, so it logs at DEBUG).
+        print("register returned False — raw tkdnd diagnostic:")
+        try:
+            import tkinter as _tk
+
+            from tkinterdnd2 import DND_FILES, TkinterDnD
+
+            print(f"  Tcl/Tk patchlevel: {root.tk.call('info', 'patchlevel')}")
+            TkinterDnD._require(root)
+            print("  _require OK; trying drop_target_register ...")
+            canvas.drop_target_register(DND_FILES)
+            print("  drop_target_register OK (unexpected success)")
+        except Exception as exc:  # noqa: BLE001 — diagnostic only
+            import traceback
+
+            traceback.print_exc()
+            print(f"  RAW tkdnd error: {type(exc).__name__}: {exc}")
         print("FAIL: tkdnd registration failed on this OS.")
         root.destroy()
         return 3
