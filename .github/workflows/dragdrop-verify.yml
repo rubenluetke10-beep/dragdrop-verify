@@ -39,10 +39,12 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          # Pin <0.5: 0.5.0 ships a Tcl-9 osx-arm64 tkdnd binary that fails to
-          # load on the standard Tcl-8.6 Python ("incompatible stubs mechanism").
-          # 0.4.x bundles Tcl-8 binaries that load on all three OSes.
-          pip install "tkinterdnd2>=0.4.0,<0.5"
+          # Pin ==0.4.2: from 0.4.4.1 onward the osx-arm64 tkdnd binary is the
+          # Tcl-9 build (libtcl9tkdnd2.9.5.dylib) that fails to load on the
+          # standard Tcl-8.6 Python ("incompatible stubs mechanism"). 0.4.2 is the
+          # highest version whose osx-arm64 binary is the Tcl-8 build
+          # (libtkdnd2.9.3.dylib), which loads on Tcl-8.6 across all three OSes.
+          pip install "tkinterdnd2==0.4.2"
           if [ "$RUNNER_OS" = "Linux" ]; then
             sudo apt-get update -qq
             sudo apt-get install -y --no-install-recommends \
